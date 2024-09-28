@@ -1,4 +1,4 @@
-import prisma from "@/app/lib/db";
+import prisma from "@/lib/db";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 //@ts-ignore
@@ -6,15 +6,19 @@ import youtubesearchapi from "youtube-search-api";
 const createStreamSchema = z.object({
   creatorId: z.string(),
   url: z.string(),
+  // videoId: z.string(),
 });
 
 var YT_REGEX =
   /^(?:(?:https?:)?\/\/)?(?:www\.)?(?:m\.)?(?:youtu(?:be)?\.com\/(?:v\/|embed\/|watch(?:\/|\?v=))|youtu\.be\/)((?:\w|-){11})(?:\S+)?$/;
 
 export async function POST(req: NextRequest) {
+  // console.log("hit the backend" + JSON.stringify(req));
   try {
     const data = createStreamSchema.parse(await req.json());
+    // console.log("data" + JSON.stringify(data));
     const isYt = data.url.match(YT_REGEX);
+    // console.log("is youtube" + isYt);
     if (!isYt) {
       return NextResponse.json(
         {
@@ -26,12 +30,14 @@ export async function POST(req: NextRequest) {
       );
     }
     const extractedId = data.url.split("?v=")[1];
+    // console.log("below isYt !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" + extractedId);
     const detail = await youtubesearchapi.GetVideoDetails(extractedId);
     const thumbnails = detail.thumbnail.thumbnails;
     thumbnails.sort((a: { width: number }, b: { width: number }) =>
       a.width > b.width ? -1 : 1
     );
-    console.log(thumbnails);
+    // console.log(detail);
+    // console.log("above stream and data" + data);
     const stream = await prisma.stream.create({
       data: {
         userId: data.creatorId,
@@ -49,11 +55,14 @@ export async function POST(req: NextRequest) {
           "https://cdn.pixabay.com/photo/2024/02/28/07/42/european-shorthair-8601492_640.jpg",
       },
     });
+    // console.log("below stream");
     return NextResponse.json({
-      message: "Added stream",
-      id: stream.id,
+      ...stream,
+      upvoteCount: 0,
+      haveUpvoted: false,
     });
   } catch (e) {
+    console.log("error" + e);
     return NextResponse.json(
       {
         message: "Errror while adding a stream",

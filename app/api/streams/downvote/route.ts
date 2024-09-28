@@ -1,4 +1,5 @@
-import prisma from "@/app/lib/db";
+import { authOptions } from "@/lib/authOptions";
+import prisma from "@/lib/db";
 import { getServerSession } from "next-auth";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
@@ -8,7 +9,7 @@ const UpvoteSchema = z.object({
 });
 
 export async function POST(req: NextRequest) {
-  const session = await getServerSession();
+  const session = await getServerSession(authOptions);
 
   if (!session?.user?.email) {
     return NextResponse.json(
@@ -21,11 +22,7 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const user = await prisma.user.findFirst({
-    where: {
-      email: session.user.email,
-    },
-  });
+  const user = session.user;
 
   if (!user) {
     return NextResponse.json(
@@ -47,6 +44,9 @@ export async function POST(req: NextRequest) {
           streamId: data.streamId,
         },
       },
+    });
+    return NextResponse.json({
+      message: "Done!",
     });
   } catch (e) {
     return NextResponse.json(
