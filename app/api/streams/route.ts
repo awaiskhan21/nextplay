@@ -2,6 +2,9 @@ import prisma from "@/lib/db";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 //@ts-ignore
+import { authOptions } from "@/lib/authOptions";
+import { getServerSession } from "next-auth";
+//@ts-ignore
 import youtubesearchapi from "youtube-search-api";
 const createStreamSchema = z.object({
   creatorId: z.string(),
@@ -76,13 +79,43 @@ export async function POST(req: NextRequest) {
 }
 
 export async function GET(req: NextRequest) {
+  console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+  const session = await getServerSession(authOptions);
+
   const creatorId = req.nextUrl.searchParams.get("creatorId");
+  if (!creatorId) {
+    return NextResponse.json(
+      {
+        message: "Error",
+      },
+      {
+        status: 411,
+      }
+    );
+  }
   const stream = await prisma.stream.findMany({
     where: {
-      userId: creatorId || "",
+      userId: creatorId,
+    },
+    include: {
+      _count: {
+        select: {
+          upvote: true,
+        },
+      },
+      upvote: {
+        where: {
+          userId: session?.user.id,
+        },
+      },
     },
   });
+
   return NextResponse.json({
-    stream,
+    streams: stream.map(({ _count, ...rest }) => ({
+      ...rest,
+      upvoteCount: _count.upvote,
+      haveUpvoted: rest.upvote.length > 0 ? true : false,
+    })),
   });
 }

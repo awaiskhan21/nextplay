@@ -3,7 +3,6 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { toast } from "@/hooks/use-toast";
 import axios from "axios";
 import {
   ChevronsDown,
@@ -13,6 +12,8 @@ import {
   Share2,
 } from "lucide-react";
 import { useEffect, useState } from "react";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const getYouTubeId = (url: string) => {
   const regExp =
@@ -34,9 +35,8 @@ type Video = {
   upvoteCount: number;
   haveUpvoted: boolean;
 };
-
 const REFRESH_INTERVAL_MS = 10 * 1000;
-export function DashboardComponent() {
+export function DashboardComponent({ creatorId }: { creatorId: string }) {
   const [url, setUrl] = useState("");
   const [queue, setQueue] = useState<Video[]>([]);
   const [currentVideo, setCurrentVideo] = useState<Video | null>(null);
@@ -44,7 +44,7 @@ export function DashboardComponent() {
   const [loading, setLoading] = useState<boolean>(false);
 
   const refreshStreams = async () => {
-    const res = await axios.get("api/streams/my");
+    const res = await axios.get(`api/streams/?creatorId=${creatorId}`);
     setQueue(
       res.data.streams.sort((a: any, b: any) =>
         a.upvotes < b.upvotes ? 1 : -1
@@ -82,7 +82,7 @@ export function DashboardComponent() {
         // In a real app, you'd fetch video details from YouTube API
         console.log("url" + url);
         const response: { data: Video } = await axios.post("/api/streams", {
-          creatorId: "ed46c805-58c8-4ca5-bd96-a5c3862054a6",
+          creatorId: creatorId,
           url,
           videoId: videoId,
         });
@@ -116,20 +116,16 @@ export function DashboardComponent() {
   };
 
   const handleShare = () => {
-    if (currentVideo) {
-      const shareUrl = `https://youtube.com/watch?v=${currentVideo.id}`;
-      navigator.clipboard.writeText(shareUrl).then(
-        () => {
-          toast({
-            title: "Link Copied!",
-            description: "The video link has been copied to your clipboard.",
-          });
-        },
-        (err) => {
-          console.error("Could not copy text: ", err);
-        }
-      );
-    }
+    const shareableLink = `${window.location.hostname}/creator/${creatorId}`;
+
+    navigator.clipboard
+      .writeText(shareableLink)
+      .then(() => {
+        toast.success("Link copied to clipboard!");
+      })
+      .catch(() => {
+        toast.error("Failed to copy the link");
+      });
   };
 
   const handlePlayNext = () => {
@@ -143,15 +139,14 @@ export function DashboardComponent() {
     <div className="min-h-screen bg-gray-950 text-gray-100 p-4">
       <div className="max-w-6xl mx-auto">
         <div className="flex justify-between items-center mb-8">
-          <h1 className="text-4xl font-bold text-purple-400">
-            NextPlay Dashboard
-          </h1>
+          <h1 className="text-4xl font-bold text-purple-400">Dashboard</h1>
           <Button
             onClick={handleShare}
             variant="outline"
             className="bg-gray-800 hover:bg-gray-700 text-purple-400 border-gray-700"
           >
-            <Share2 className="mr-2 h-4 w-4" /> Share Current Song
+            <Share2 className="mr-2 h-4 w-4" /> Share
+            <ToastContainer />
           </Button>
         </div>
         <div className="flex flex-col lg:flex-row gap-8">

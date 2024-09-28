@@ -1,19 +1,12 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { MusicIcon } from "lucide-react";
 import { signIn } from "next-auth/react";
 import Link from "next/link";
 
 export function SigninPage() {
   return (
     <div className="flex flex-col min-h-screen bg-gray-950 text-gray-100">
-      <header className="w-full px-4 lg:px-6 h-16 flex items-center justify-center border-b border-gray-800">
-        <Link className="flex items-center justify-center" href="/">
-          <MusicIcon className="h-6 w-6 text-purple-400" />
-          <span className="ml-2 text-lg font-bold">NextPlay</span>
-        </Link>
-      </header>
       <main className="flex-1 flex items-center justify-center px-4 py-12">
         <div className="w-full max-w-md space-y-8">
           <div className="text-center">
