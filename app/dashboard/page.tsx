@@ -8,6 +8,7 @@ export default async function Dashboard() {
   const creatorId = session?.user.id ?? "";
   return (
     <div>
+      <div>{creatorId}</div>
       <DashboardComponent creatorId={creatorId} />
     </div>
   );

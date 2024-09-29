@@ -1,14 +1,16 @@
 import { DashboardComponent } from "@/components/dashboard";
 
-export default function ({
+export default function Creator({
   params: { creatorId },
 }: {
-  params: { creatorId: string };
+  params: {
+    creatorId: string;
+  };
 }) {
   return (
     <div>
       {creatorId}
-      <DashboardComponent creatorId={creatorId} />{" "}
+      <DashboardComponent creatorId={creatorId} />
     </div>
   );
 }

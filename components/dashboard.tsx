@@ -12,7 +12,7 @@ import {
   Share2,
 } from "lucide-react";
 import { useEffect, useState } from "react";
-import { toast, ToastContainer } from "react-toastify";
+import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 const getYouTubeId = (url: string) => {
@@ -140,6 +140,7 @@ export function DashboardComponent({ creatorId }: { creatorId: string }) {
       <div className="max-w-6xl mx-auto">
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-4xl font-bold text-purple-400">Dashboard</h1>
+          <div>{creatorId}</div>
           <Button
             onClick={handleShare}
             variant="outline"
