@@ -79,7 +79,7 @@ export async function POST(req: NextRequest) {
 }
 
 export async function GET(req: NextRequest) {
-  console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+  // console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
   const session = await getServerSession(authOptions);
 
   const creatorId = req.nextUrl.searchParams.get("creatorId");
@@ -93,23 +93,33 @@ export async function GET(req: NextRequest) {
       }
     );
   }
-  const stream = await prisma.stream.findMany({
-    where: {
-      userId: creatorId,
-    },
-    include: {
-      _count: {
-        select: {
-          upvote: true,
+  const [stream, activeStream] = await Promise.all([
+    prisma.stream.findMany({
+      where: {
+        userId: creatorId,
+      },
+      include: {
+        _count: {
+          select: {
+            upvote: true,
+          },
+        },
+        upvote: {
+          where: {
+            userId: session?.user.id,
+          },
         },
       },
-      upvote: {
-        where: {
-          userId: session?.user.id,
-        },
+    }),
+    prisma.currentStream.findFirst({
+      where: {
+        userId: creatorId,
       },
-    },
-  });
+      include: {
+        stream: true,
+      },
+    }),
+  ]);
 
   return NextResponse.json({
     streams: stream.map(({ _count, ...rest }) => ({

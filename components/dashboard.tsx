@@ -44,10 +44,11 @@ export function DashboardComponent({ creatorId }: { creatorId: string }) {
   const [loading, setLoading] = useState<boolean>(false);
 
   const refreshStreams = async () => {
-    const res = await axios.get(`api/streams/?creatorId=${creatorId}`);
+    const res = await axios.get(`/api/streams/?creatorId=${creatorId}`);
+
     setQueue(
       res.data.streams.sort((a: any, b: any) =>
-        a.upvotes < b.upvotes ? 1 : -1
+        a.upvoteCount < b.upvoteCount ? 1 : -1
       )
     );
   };
@@ -56,7 +57,7 @@ export function DashboardComponent({ creatorId }: { creatorId: string }) {
   useEffect(() => {
     refreshStreams();
     setInterval(() => {
-      // refreshStreams();
+      refreshStreams();
     }, REFRESH_INTERVAL_MS);
   }, []);
 
@@ -103,12 +104,14 @@ export function DashboardComponent({ creatorId }: { creatorId: string }) {
           video.id === id
             ? {
                 ...video,
-                upvotes: isUpvote ? video.upvotes + 1 : video.upvotes - 1,
+                upvotes: isUpvote
+                  ? video.upvoteCount + 1
+                  : video.upvoteCount - 1,
                 haveUpvoted: !video.haveUpvoted,
               }
             : video
         )
-        .sort((a, b) => b.upvotes - a.upvotes)
+        .sort((a, b) => b.upvoteCount - a.upvoteCount)
     );
     await axios.post(`/api/streams/${isUpvote ? "upvote" : "downvote"}`, {
       streamId: id,
