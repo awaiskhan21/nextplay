@@ -39,11 +39,11 @@ export async function GET() {
       },
     },
   });
-  console.log(
-    "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
-  );
-  console.log("user: - " + session.user.id);
-  console.log("mostupvoted :- " + mostUpvotedStream);
+  // console.log(
+  //   "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+  // );
+  // console.log("user: - " + session.user.id);
+  // console.log("mostupvoted :- " + mostUpvotedStream);
   await Promise.all([
     prisma.currentStream.upsert({
       where: {
