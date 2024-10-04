@@ -25,23 +25,30 @@ const getYouTubeId = (url: string) => {
 type Video = {
   id: string;
   type: string;
-  url: String;
-  extractedId: String;
-  smallImg: String;
-  bigImg: String;
+  url: string;
+  extractedId: string;
+  smallImg: string;
+  bigImg: string;
   active: Boolean;
-  userId: String;
+  userId: string;
   title: string;
   upvoteCount: number;
   haveUpvoted: boolean;
 };
 const REFRESH_INTERVAL_MS = 10 * 1000;
-export function DashboardComponent({ creatorId }: { creatorId: string }) {
+export function DashboardComponent({
+  creatorId,
+  isCreator = false,
+}: {
+  creatorId: string;
+  isCreator: boolean;
+}) {
   const [url, setUrl] = useState("");
   const [queue, setQueue] = useState<Video[]>([]);
   const [currentVideo, setCurrentVideo] = useState<Video | null>(null);
   const [previewId, setPreviewId] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
+  const [nextLoading, setNextLoading] = useState<boolean>(false);
 
   const refreshStreams = async () => {
     const res = await axios.get(`/api/streams/?creatorId=${creatorId}`);
@@ -51,13 +58,20 @@ export function DashboardComponent({ creatorId }: { creatorId: string }) {
         a.upvoteCount < b.upvoteCount ? 1 : -1
       )
     );
+    setCurrentVideo((video) => {
+      if (video?.id === res.data.activeStream?.stream?.id) {
+        return video;
+      } else {
+        return res.data.activeStream.stream;
+      }
+    });
   };
 
   //fetching data
   useEffect(() => {
     refreshStreams();
     setInterval(() => {
-      refreshStreams();
+      // refreshStreams();
     }, REFRESH_INTERVAL_MS);
   }, []);
 
@@ -131,10 +145,13 @@ export function DashboardComponent({ creatorId }: { creatorId: string }) {
       });
   };
 
-  const handlePlayNext = () => {
+  const handlePlayNext = async () => {
     if (queue.length > 0) {
-      setCurrentVideo(queue[0]);
-      setQueue(queue.slice(1));
+      const res = await axios.get("/api/streams/next");
+      setNextLoading(true);
+      setCurrentVideo(res.data.stream);
+      setQueue((q) => q.filter((x) => x.id !== res.data.stream.id));
+      setNextLoading(false);
     }
   };
 
@@ -143,7 +160,9 @@ export function DashboardComponent({ creatorId }: { creatorId: string }) {
       <div className="max-w-6xl mx-auto">
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-4xl font-bold text-purple-400">Dashboard</h1>
-          <div>{creatorId}</div>
+          <div className="bg-red-400">
+            helllowsss {isCreator ? "!!!!!!!!!" : "#######"}
+          </div>
           <Button
             onClick={handleShare}
             variant="outline"
@@ -202,22 +221,35 @@ export function DashboardComponent({ creatorId }: { creatorId: string }) {
                   <h2 className="text-2xl font-semibold text-purple-400">
                     Now Playing
                   </h2>
-                  <Button
-                    onClick={handlePlayNext}
-                    className="bg-purple-600 hover:bg-purple-700 text-white"
-                  >
-                    <PlayCircle className="mr-2 h-4 w-4" /> Play Next
-                  </Button>
+                  {isCreator ? (
+                    <Button
+                      onClick={handlePlayNext}
+                      className="bg-purple-600 hover:bg-purple-700 text-white"
+                    >
+                      {nextLoading ? (
+                        "Loading..."
+                      ) : (
+                        <>
+                          {" "}
+                          <PlayCircle className="mr-2 h-4 w-4" /> Play Next
+                        </>
+                      )}
+                    </Button>
+                  ) : null}
                 </div>
                 {currentVideo ? (
                   <div className="space-y-4">
                     <div className="aspect-video rounded-lg overflow-hidden">
-                      <iframe
-                        src={`https://www.youtube.com/embed/${currentVideo.id}`}
-                        className="w-full h-full"
-                        allowFullScreen
-                        title={currentVideo.title}
-                      />
+                      {isCreator ? (
+                        <iframe
+                          src={`https://www.youtube.com/embed/${currentVideo.extractedId}`}
+                          className="w-full h-full"
+                          allowFullScreen
+                          title={currentVideo.title}
+                        />
+                      ) : (
+                        <img src={currentVideo.bigImg} />
+                      )}
                     </div>
                     <h3 className="font-medium text-lg text-purple-300">
                       {currentVideo.title}

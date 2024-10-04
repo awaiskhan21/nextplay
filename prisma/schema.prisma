@@ -24,6 +24,9 @@ model User {
 model Stream {
   id            String         @id @default(uuid())
   type          StreamType
+  played        Boolean        @default(false)
+  playedTs      DateTime?
+  createdAt     DateTime       @default(now())
   url           String
   extractedId   String
   title         String         @default("")

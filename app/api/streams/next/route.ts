@@ -3,7 +3,7 @@ import prisma from "@/lib/db";
 import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
 
-export default async function GET() {
+export async function GET() {
   const session = await getServerSession(authOptions);
 
   if (!session?.user) {
@@ -19,15 +19,31 @@ export default async function GET() {
 
   const mostUpvotedStream = await prisma.stream.findFirst({
     where: {
-      id: session.user.id,
+      userId: session.user.id,
+      played: false,
     },
-    orderBy: {
-      upvote: {
-        _count: "desc",
+    orderBy: [
+      {
+        upvote: {
+          _count: "desc",
+        },
+      },
+      {
+        createdAt: "asc",
+      },
+    ],
+    include: {
+      upvote: true,
+      _count: {
+        select: { upvote: true },
       },
     },
   });
-
+  console.log(
+    "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+  );
+  console.log("user: - " + session.user.id);
+  console.log("mostupvoted :- " + mostUpvotedStream);
   await Promise.all([
     prisma.currentStream.upsert({
       where: {
@@ -41,9 +57,13 @@ export default async function GET() {
         streamId: mostUpvotedStream?.id,
       },
     }),
-    prisma.stream.delete({
+    prisma.stream.updateMany({
       where: {
-        id: mostUpvotedStream?.id,
+        id: mostUpvotedStream?.id ?? "",
+      },
+      data: {
+        played: true,
+        playedTs: new Date(),
       },
     }),
   ]);
