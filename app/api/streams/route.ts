@@ -1,10 +1,9 @@
+import { authOptions } from "@/lib/authOptions";
 import prisma from "@/lib/db";
+import { getServerSession } from "next-auth";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
-//@ts-ignore
-import { authOptions } from "@/lib/authOptions";
-import { getServerSession } from "next-auth";
-//@ts-ignore
+//@ts-expect-error
 import youtubesearchapi from "youtube-search-api";
 const createStreamSchema = z.object({
   creatorId: z.string(),
@@ -12,7 +11,7 @@ const createStreamSchema = z.object({
   // videoId: z.string(),
 });
 
-var YT_REGEX =
+const YT_REGEX =
   /^(?:(?:https?:)?\/\/)?(?:www\.)?(?:m\.)?(?:youtu(?:be)?\.com\/(?:v\/|embed\/|watch(?:\/|\?v=))|youtu\.be\/)((?:\w|-){11})(?:\S+)?$/;
 
 export async function POST(req: NextRequest) {

@@ -11,10 +11,11 @@ import {
   Plus,
   Share2,
 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-
+//@ts-expect-error
+import YouTubePlayer from "youtube-player";
 const getYouTubeId = (url: string) => {
   const regExp =
     /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
@@ -29,7 +30,7 @@ type Video = {
   extractedId: string;
   smallImg: string;
   bigImg: string;
-  active: Boolean;
+  active: boolean;
   userId: string;
   title: string;
   upvoteCount: number;
@@ -49,7 +50,7 @@ export function DashboardComponent({
   const [previewId, setPreviewId] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [nextLoading, setNextLoading] = useState<boolean>(false);
-
+  const videoPlayerRef = useRef();
   const refreshStreams = async () => {
     const res = await axios.get(`/api/streams/?creatorId=${creatorId}`);
 
@@ -75,12 +76,47 @@ export function DashboardComponent({
     }, REFRESH_INTERVAL_MS);
   }, []);
 
+  //update queue
   useEffect(() => {
     if (queue.length > 0 && !currentVideo) {
       setCurrentVideo(queue[0]);
       setQueue(queue.slice(1));
     }
   }, [queue, currentVideo]);
+
+  const handlePlayNext = async () => {
+    if (queue.length > 0) {
+      const res = await axios.get("/api/streams/next");
+      setNextLoading(true);
+      setCurrentVideo(res.data.stream);
+      setQueue((q) => q.filter((x) => x.id !== res.data.stream.id));
+      setNextLoading(false);
+    }
+  };
+
+  //auto play next
+  useEffect(() => {
+    if (!videoPlayerRef.current) {
+      return;
+    }
+    const player = YouTubePlayer(videoPlayerRef.current);
+
+    // 'loadVideoById' is queued until the player is ready to receive API calls.
+    player.loadVideoById(currentVideo?.extractedId);
+
+    player.playVideo();
+
+    function handleEvent(event: any) {
+      // console.log(event.data);
+      if (event.data === 0) {
+        handlePlayNext();
+      }
+    }
+    player.on("stateChange", handleEvent);
+    return () => {
+      player.destroy();
+    };
+  }, [currentVideo, videoPlayerRef]);
 
   const handleUrlChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setUrl(e.target.value);
@@ -145,24 +181,12 @@ export function DashboardComponent({
       });
   };
 
-  const handlePlayNext = async () => {
-    if (queue.length > 0) {
-      const res = await axios.get("/api/streams/next");
-      setNextLoading(true);
-      setCurrentVideo(res.data.stream);
-      setQueue((q) => q.filter((x) => x.id !== res.data.stream.id));
-      setNextLoading(false);
-    }
-  };
-
   return (
     <div className="min-h-screen bg-gray-950 text-gray-100 p-4">
       <div className="max-w-6xl mx-auto">
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-4xl font-bold text-purple-400">Dashboard</h1>
-          <div className="bg-red-400">
-            helllowsss {isCreator ? "!!!!!!!!!" : "#######"}
-          </div>
+          <div className="bg-red-400"></div>
           <Button
             onClick={handleShare}
             variant="outline"
@@ -238,15 +262,13 @@ export function DashboardComponent({
                   ) : null}
                 </div>
                 {currentVideo ? (
-                  <div className="space-y-4">
-                    <div className="aspect-video rounded-lg overflow-hidden">
+                  <div className="space-y-4 aspect-video">
+                    <div className="aspect-video">
                       {isCreator ? (
-                        <iframe
-                          src={`https://www.youtube.com/embed/${currentVideo.extractedId}`}
-                          className="w-full h-full"
-                          allowFullScreen
-                          title={currentVideo.title}
-                        />
+                        <div className="">
+                          {/* @ts-ignore */}
+                          <div ref={videoPlayerRef} className="w-full" />
+                        </div>
                       ) : (
                         <img src={currentVideo.bigImg} />
                       )}
@@ -270,7 +292,7 @@ export function DashboardComponent({
               </h2>
               {queue.length > 0 ? (
                 <ul className="space-y-4">
-                  {queue.map((video, index) => (
+                  {queue.map((video) => (
                     <li
                       key={video.id}
                       className="flex items-center space-x-4 bg-gray-800 p-3 rounded-lg"

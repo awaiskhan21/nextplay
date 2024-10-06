@@ -12,7 +12,7 @@ export function LandingPageComponent() {
 
   useEffect(() => {
     if (session.data?.user) router.push("/dashboard");
-  }, [session]);
+  }, [session, router]);
 
   return (
     <div className="flex flex-col min-h-screen bg-gray-950 text-gray-100">
@@ -56,7 +56,7 @@ export function LandingPageComponent() {
                   Fan-Driven Playlists
                 </h3>
                 <p className="text-gray-400 text-lg">
-                  Let your audience curate your stream's soundtrack.
+                  Let your audience curate your stream soundtrack.
                 </p>
               </div>
               <div className="flex flex-col items-center text-center">

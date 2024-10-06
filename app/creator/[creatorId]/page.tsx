@@ -16,7 +16,6 @@ export default async function Creator({
   }
   return (
     <div>
-      {creatorId}
       <DashboardComponent creatorId={creatorId} isCreator={false} />
     </div>
   );
