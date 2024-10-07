@@ -18,7 +18,7 @@ export async function POST(req: NextRequest) {
   // console.log("hit the backend" + JSON.stringify(req));
   try {
     const data = createStreamSchema.parse(await req.json());
-    // console.log("data" + JSON.stringify(data));
+    console.log("data" + JSON.stringify(data));
     const isYt = data.url.match(YT_REGEX);
     // console.log("is youtube" + isYt);
     if (!isYt) {
@@ -32,7 +32,7 @@ export async function POST(req: NextRequest) {
       );
     }
     const extractedId = data.url.split("?v=")[1];
-    // console.log("below isYt !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" + extractedId);
+    console.log("below isYt !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" + extractedId);
     const detail = await youtubesearchapi.GetVideoDetails(extractedId);
     const thumbnails = detail.thumbnail.thumbnails;
     thumbnails.sort((a: { width: number }, b: { width: number }) =>
@@ -57,7 +57,7 @@ export async function POST(req: NextRequest) {
           "https://cdn.pixabay.com/photo/2024/02/28/07/42/european-shorthair-8601492_640.jpg",
       },
     });
-    // console.log("below stream");
+    console.log("stream created successfully");
     return NextResponse.json({
       ...stream,
       upvoteCount: 0,

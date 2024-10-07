@@ -8,7 +8,7 @@ export default async function Dashboard() {
   if (!session?.user) {
     redirect("/signin");
   }
-  const creatorId = session?.user.id ?? "";
+  const creatorId = session?.user.id;
   return (
     <div>
       <DashboardComponent creatorId={creatorId} isCreator={true} />
