@@ -4,16 +4,25 @@ import { HeartIcon, PlayCircleIcon, UsersIcon } from "lucide-react";
 import { signIn, useSession } from "next-auth/react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { LoadingComponent } from "./loading";
 
 export function LandingPageComponent() {
   const session = useSession();
   const router = useRouter();
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (session.data?.user) router.push("/dashboard");
+    if (session.data?.user) {
+      setLoading(true);
+      router.push("/dashboard");
+      setLoading(false);
+    }
   }, [session, router]);
 
+  if (loading) {
+    return <LoadingComponent />;
+  }
   return (
     <div className="flex flex-col min-h-screen bg-gray-950 text-gray-100">
       <main className="flex-1">
