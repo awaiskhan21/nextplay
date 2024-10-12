@@ -5,6 +5,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 //@ts-expect-error
 import youtubesearchapi from "youtube-search-api";
+
 const createStreamSchema = z.object({
   creatorId: z.string(),
   url: z.string(),
@@ -15,11 +16,21 @@ const YT_REGEX =
   /^(?:(?:https?:)?\/\/)?(?:www\.)?(?:m\.)?(?:youtu(?:be)?\.com\/(?:v\/|embed\/|watch(?:\/|\?v=))|youtu\.be\/)((?:\w|-){11})(?:\S+)?$/;
 
 export async function POST(req: NextRequest) {
-  // console.log("hit the backend" + JSON.stringify(req));
+  console.log("hit the backend" + JSON.stringify(req));
   try {
-    const data = createStreamSchema.parse(await req.json());
-    console.log("data" + JSON.stringify(data));
-    const isYt = data.url.match(YT_REGEX);
+    const res = createStreamSchema.safeParse(await req.json());
+    if (!res.success || res == undefined) {
+      return NextResponse.json(
+        {
+          message: "InValid inputs",
+        },
+        {
+          status: 400,
+        }
+      );
+    }
+    console.log("data" + JSON.stringify(res?.data));
+    const isYt = res?.data.url.match(YT_REGEX);
     // console.log("is youtube" + isYt);
     if (!isYt) {
       return NextResponse.json(
@@ -31,19 +42,19 @@ export async function POST(req: NextRequest) {
         }
       );
     }
-    const extractedId = data.url.split("?v=")[1];
+    const extractedId = res?.data.url.split("?v=")[1];
     console.log("below isYt !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" + extractedId);
     const detail = await youtubesearchapi.GetVideoDetails(extractedId);
     const thumbnails = detail.thumbnail.thumbnails;
     thumbnails.sort((a: { width: number }, b: { width: number }) =>
       a.width > b.width ? -1 : 1
     );
-    // console.log(detail);
-    // console.log("above stream and data" + data);
+    console.log("details " + detail);
+    console.log("above stream and data" + res?.data);
     const stream = await prisma.stream.create({
       data: {
-        userId: data.creatorId,
-        url: data.url,
+        userId: res?.data.creatorId,
+        url: res?.data.url,
         extractedId: extractedId,
         type: "Youtube",
         title: detail.title ?? "Title not available",

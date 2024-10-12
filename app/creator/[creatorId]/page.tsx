@@ -16,6 +16,11 @@ export default async function Creator({
   }
   return (
     <div>
+      <div>creator Id = {creatorId ? creatorId : "no creatorId"}</div>
+      <div>
+        user Id ={" "}
+        {session.user.id ? session.user.id : "userId is not available"}
+      </div>
       <DashboardComponent creatorId={creatorId} isCreator={false} />
     </div>
   );

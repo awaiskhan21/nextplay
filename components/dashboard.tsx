@@ -97,6 +97,7 @@ export function DashboardComponent({
   //auto play next
   useEffect(() => {
     if (!videoPlayerRef.current) {
+      console.log("is it here!!!!!!!!!!!!!!!!!!!!!");
       return;
     }
     const player = YouTubePlayer(videoPlayerRef.current);
@@ -130,8 +131,6 @@ export function DashboardComponent({
     console.log("vid" + videoId);
     if (videoId) {
       try {
-        // In a real app, you'd fetch video details from YouTube API
-        // console.log("url" + url);
         const response: { data: Video } = await axios.post("/api/streams", {
           creatorId: creatorId,
           url,
