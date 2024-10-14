@@ -45,7 +45,9 @@ export async function POST(req: NextRequest) {
     const extractedId = res?.data.url.split("?v=")[1];
     console.log("below isYt !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" + extractedId);
     const detail = await youtubesearchapi.GetVideoDetails(extractedId);
+    console.log("details of yt vdo => " + detail);
     const thumbnails = detail.thumbnail.thumbnails;
+    console.log("thumbanils => " + thumbnails);
     thumbnails.sort((a: { width: number }, b: { width: number }) =>
       a.width > b.width ? -1 : 1
     );
