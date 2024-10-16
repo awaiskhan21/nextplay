@@ -46,8 +46,12 @@ export async function POST(req: NextRequest) {
     console.log("below isYt !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" + extractedId);
     const detail = await youtubesearchapi.GetVideoDetails(extractedId);
     console.log("details of yt vdo => " + detail);
-    const thumbnails = detail?.thumbnail?.thumbnails ?? [];
+    //at localhost it is returning - details of yt vdo => [object Object]
+    //in prod details of yt vdo => [object Object]
+    const thumbnails = await detail?.thumbnail?.thumbnails;
     console.log("thumbanils => " + detail.thumbnail);
+    //local - thumbanils => [object Object]
+    //prod - thumbanils => undefined
     thumbnails.sort((a: { width: number }, b: { width: number }) =>
       a.width > b.width ? -1 : 1
     );
@@ -72,6 +76,7 @@ export async function POST(req: NextRequest) {
     });
     console.log("stream created successfully");
     return NextResponse.json({
+      thumbnails,
       ...stream,
       upvoteCount: 0,
       haveUpvoted: false,
