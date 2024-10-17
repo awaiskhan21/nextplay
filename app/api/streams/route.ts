@@ -46,15 +46,12 @@ export async function POST(req: NextRequest) {
     console.log("below isYt !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" + extractedId);
     const detail = await youtubesearchapi.GetVideoDetails(extractedId);
     console.log("details of yt vdo => " + detail);
-    //at localhost it is returning - details of yt vdo => [object Object]
-    //in prod details of yt vdo => [object Object]
-    const thumbnails = await detail?.thumbnail?.thumbnails;
-    console.log("thumbanils => " + detail.thumbnail);
-    //local - thumbanils => [object Object]
-    //prod - thumbanils => undefined
-    thumbnails.sort((a: { width: number }, b: { width: number }) =>
-      a.width > b.width ? -1 : 1
-    );
+
+    const thumbnail = `https://img.youtube.com/vi/${extractedId}/0.jpg`;
+    console.log("thumbanil => " + thumbnail);
+    // thumbnails.sort((a: { width: number }, b: { width: number }) =>
+    //   a.width > b.width ? -1 : 1
+    // );
     console.log("details " + detail);
     console.log("above stream and data" + res?.data);
     const stream = await prisma.stream.create({
@@ -65,18 +62,16 @@ export async function POST(req: NextRequest) {
         type: "Youtube",
         title: detail.title ?? "Title not available",
         smallImg:
-          thumbnails.length > 1
-            ? thumbnails[1].url
-            : thumbnails[0].url ??
-              "https://cdn.pixabay.com/photo/2024/02/28/07/42/european-shorthair-8601492_640.jpg",
+          thumbnail ??
+          "https://cdn.pixabay.com/photo/2024/02/28/07/42/european-shorthair-8601492_640.jpg",
         bigImg:
-          thumbnails[0].url ??
+          thumbnail ??
           "https://cdn.pixabay.com/photo/2024/02/28/07/42/european-shorthair-8601492_640.jpg",
       },
     });
     console.log("stream created successfully");
     return NextResponse.json({
-      thumbnails,
+      thumbnail,
       ...stream,
       upvoteCount: 0,
       haveUpvoted: false,
