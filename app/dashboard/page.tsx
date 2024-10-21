@@ -11,7 +11,7 @@ export default async function Dashboard() {
   const creatorId = session?.user.id;
   return (
     <div>
-      {session.user.id ? session.user.id : "Id is not available"}
+      {/* {session.user.id ? session.user.id : "Id is not available"} */}
       <DashboardComponent creatorId={creatorId} isCreator={true} />
     </div>
   );
