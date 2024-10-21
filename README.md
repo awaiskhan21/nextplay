@@ -11,6 +11,10 @@ NextPlay is a collaborative music queuing platform that allows users to add YouT
 - Automatic removal of played songs from the queue
 - Shareable creator pages
 
+## Project Walkthrough
+
+[Watch the walkthrough on YouTube](https://youtu.be/9UKQw-FavPE)
+
 ## Tech Stack
 
 - [Next.js](https://nextjs.org/) - React framework for building the frontend and API routes
