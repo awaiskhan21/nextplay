@@ -1,7 +1,6 @@
 "use client";
-import { signIn, signOut, useSession } from "next-auth/react";
-
 import { MusicIcon } from "lucide-react";
+import { signIn, signOut, useSession } from "next-auth/react";
 import Link from "next/link";
 import { Button } from "./ui/button";
 
@@ -24,10 +23,11 @@ function Appbar() {
             </Button>
           ) : (
             <Button
+              disabled={session.status === "loading"}
               className="bg-purple-600 text-white hover:bg-purple-700 px-8 py-2 text-lg"
               onClick={() => signIn()}
             >
-              Sign In
+              {session.status === "loading" ? "Loading..." : "Sign In"}
             </Button>
           )}
         </nav>

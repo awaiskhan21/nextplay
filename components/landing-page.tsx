@@ -11,6 +11,7 @@ export function LandingPageComponent() {
   const session = useSession();
   const router = useRouter();
   const [loading, setLoading] = useState(false);
+  const [buttonLoading, setButtonLoading] = useState(false);
 
   useEffect(() => {
     if (session.data?.user) {
@@ -38,10 +39,18 @@ export function LandingPageComponent() {
               </p>
               <div className="flex flex-col sm:flex-row gap-4">
                 <Button
+                  disabled={buttonLoading}
                   className="bg-purple-600 text-white hover:bg-purple-700 px-8 py-2 text-lg"
-                  onClick={() => signIn()}
+                  onClick={async () => {
+                    setButtonLoading(true);
+                    try {
+                      await signIn(); // Wait for signIn to complete
+                    } finally {
+                      setButtonLoading(false); // Ensure loading state is reset
+                    }
+                  }}
                 >
-                  Get Started
+                  {buttonLoading ? `Loading...` : "Get Started"}
                 </Button>
                 <Button
                   variant="outline"
@@ -101,11 +110,19 @@ export function LandingPageComponent() {
               </p>
               <div className="w-full max-w-md space-y-4">
                 <Button
+                  disabled={buttonLoading}
                   type="submit"
                   className="bg-purple-600 text-white hover:bg-purple-700 text-lg py-6 px-8"
-                  onClick={() => signIn()}
+                  onClick={async () => {
+                    setButtonLoading(true);
+                    try {
+                      await signIn();
+                    } finally {
+                      setButtonLoading(false);
+                    }
+                  }}
                 >
-                  Sign Up
+                  {buttonLoading ? "Loading..." : "Sign Up"}
                 </Button>
                 <p className="text-sm text-gray-500">
                   By signing up, you agree to our{" "}
